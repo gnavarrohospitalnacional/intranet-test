@@ -1,0 +1,69 @@
+############################################
+# STAGE 1 — Build frontend (Vite)
+############################################
+FROM node:20-alpine AS frontend
+
+WORKDIR /app
+
+# Copiamos solo lo necesario para cache eficiente
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY resources ./resources
+COPY public ./public
+COPY vite.config.js .
+
+RUN npm run build
+
+
+############################################
+# STAGE 2 — PHP + Laravel (runtime)
+############################################
+FROM php:8.4-fpm-alpine
+
+# Dependencias del sistema
+RUN apk add --no-cache \
+    bash \
+    git \
+    curl \
+    icu-dev \
+    libzip-dev \
+    oniguruma-dev \
+    libpng-dev
+
+# Extensiones PHP
+RUN docker-php-ext-install \
+    pdo_mysql \
+    mbstring \
+    zip \
+    exif \
+    pcntl \
+    bcmath \
+    intl \
+    gd \
+    opcache
+
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www
+
+# Dependencias PHP
+COPY composer.json artisan composer.lock ./
+RUN composer install \
+    --no-scripts
+
+# Copiamos el proyecto
+COPY . .
+
+# ⬅️ COPIAMOS LOS ASSETS YA COMPILADOS
+COPY --from=frontend /app/public/build ./public/build
+
+# Permisos
+RUN chown -R www-data:www-data /var/www \
+ && chmod -R 775 storage bootstrap/cache
+
+USER www-data
+# Expose port 9000 and start php-fpm server
+EXPOSE 9000
+CMD ["php-fpm"]
