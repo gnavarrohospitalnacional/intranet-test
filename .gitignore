@@ -23,7 +23,7 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 # Oracle Instant Client
-instantclient-*.zip
+#instantclient-*.zip
 
 # Laravel Debugbar
 storage/debugbar/
