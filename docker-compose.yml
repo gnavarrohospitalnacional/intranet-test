@@ -35,7 +35,7 @@ services:
     restart: unless-stopped
     tty: true
     ports:
-      - "8001:80"
+      - "8002:80"
     networks: 
       - api-intranet-nacional-network
     volumes:
