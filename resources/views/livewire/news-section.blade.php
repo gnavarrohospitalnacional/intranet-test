@@ -13,7 +13,7 @@
                     {{ $tipoSeleccionado === 'all'
                     ? 'text-green-hn border-green-hn'
                     : 'border-gray-200 hover:border-green-hn' }}">
-                TodasSSSSS
+                TodasSSSSSS
             </button>
 
             {{-- Tipos dinámicos --}}
